@@ -3,10 +3,12 @@ let price = document.getElementById("price");
 let taxes = document.getElementById("taxes");
 let ads = document.getElementById("ads");
 let discounts = document.getElementById("discounts");
+let items = document.getElementById('items')
 let total = document.getElementById("total");
 let count = document.getElementById("count");
 let category = document.getElementById("category");
 let submit = document.getElementById("submit");
+let allprices = document.getElementById("allprices");
 let mode = "create";
 let temp;
 //get total price
@@ -35,18 +37,20 @@ submit.onclick = () => {
     taxes: taxes.value,
     ads: ads.value,
     discounts: discounts.value,
+    items:items.value,
     total: total.innerHTML,
     count: count.value,
     category: category.value.toLowerCase(),
   };
   if (mode === "create") {
-    if (product.count > 1) {
-      for (let i = 0; i < product.count; i++) {
-        dataProduct.push(product);
-      }
-    } else {
-      dataProduct.push(product);
-    }
+    // if (product.count > 1) {
+    //   for (let i = 0; i < product.count; i++) {
+    //     dataProduct.push(product);
+    //   }
+    // } else {
+    //   dataProduct.push(product);
+    // }
+    dataProduct.push(product);
   } else {
     dataProduct[temp] = product;
     mode = "create";
@@ -67,6 +71,7 @@ let cleaningInputs = () => {
   taxes.value = "";
   ads.value = "";
   discounts.value = "";
+  items.value=""
   total.innerHTML = "";
   count.value = "";
   category.value = "";
@@ -76,6 +81,8 @@ let cleaningInputs = () => {
 //function creating new products
 const showProducts = () => {
   let table = "";
+  let pricing = 0;
+  let numItems = 0
   for (let i = 0; i < dataProduct.length; i++) {
     table += `
          <tr>
@@ -86,9 +93,11 @@ const showProducts = () => {
          <td>${dataProduct[i].ads}</td>
          <td>${dataProduct[i].discounts}</td>
          <td>${dataProduct[i].total}</td>
+         <td>${dataProduct[i].items}</td>
          <td>${dataProduct[i].category}</td>
          <td><button onclick="updateData(${i})" id="update">Update</button></td>
          <td><button onclick="delproduct(${i})" id="delete">Delete</button></td>
+         <td><button onclick="decrease(${i})" id="decrease">Decrease</button></td>
        </tr>
        `;
     let delAllBtn = document.getElementById("deleteAll");
@@ -97,25 +106,36 @@ const showProducts = () => {
     } else {
       delAllBtn.innerHTML = "";
     }
+    pricing += parseInt(`${dataProduct[i].price * dataProduct[i].items}`);
+    // numItems += parseInt(`${dataProduct[i].items}`);
   }
 
   document.getElementById("tableBody").innerHTML = table;
+  allprices.innerHTML = `Total Price For All Product In The Store : ${pricing  } L.E`;
 };
 showProducts();
 
 //function delete one product
 let delproduct = (product) => {
-  dataProduct.splice(product, 1);
-  localStorage.product = JSON.stringify(dataProduct);
-
-  showProducts();
+  let delConfirm =  confirm("Warning Youe Will delet This Product .. Are You Sure!");
+  if(delConfirm === true){
+    dataProduct.splice(product, 1);
+    localStorage.product = JSON.stringify(dataProduct);
+  
+    showProducts();
+  }
+ 
 };
 
 let deleteAllProduct = () => {
+ let delallConfirm =  confirm("Warning Youe Will delet All products .. Are You Sure!");
+ if(delallConfirm ==true ){
   localStorage.clear();
   dataProduct.splice(0);
   dataProduct.length = 0;
   showProducts();
+ }
+
 };
 // update data
 
@@ -125,6 +145,7 @@ let updateData = (i) => {
   taxes.value = dataProduct[i].taxes;
   ads.value = dataProduct[i].ads;
   discounts.value = dataProduct[i].discounts;
+  items.value=dataProduct[i].items;
   getTotal();
   count.style.display = "none";
   submit.innerHTML = "UPDATE";
@@ -170,9 +191,11 @@ let searching = (value) => {
         <td>${dataProduct[i].ads}</td>
         <td>${dataProduct[i].discounts}</td>
         <td>${dataProduct[i].total}</td>
+        <td>${dataProduct[i].items}</td>
         <td>${dataProduct[i].category}</td>
         <td><button onclick="updateData(${i})" id="update">Update</button></td>
         <td><button onclick="delproduct(${i})" id="delete">Delete</button></td>
+        <td><button onclick="decrease(${i})" id="decrease">Decrease</button></td>
       </tr>
       `;
       }
@@ -189,9 +212,11 @@ let searching = (value) => {
       <td>${dataProduct[i].ads}</td>
       <td>${dataProduct[i].discounts}</td>
       <td>${dataProduct[i].total}</td>
+      <td>${dataProduct[i].items}</td>
       <td>${dataProduct[i].category}</td>
       <td><button onclick="updateData(${i})" id="update">Update</button></td>
       <td><button onclick="delproduct(${i})" id="delete">Delete</button></td>
+      <td><button onclick="decrease(${i})" id="decrease">Decrease</button></td>
     </tr>
     `;
       }
@@ -199,3 +224,21 @@ let searching = (value) => {
   }
   document.getElementById("tableBody").innerHTML = table;
 };
+
+
+let decrease = (item)=>{
+  for (let i = 0; i < dataProduct.length; i++) {
+   if(dataProduct[i]===dataProduct[item]){
+    if(dataProduct[item].items > 0){
+      dataProduct[item].items--
+      localStorage.setItem("product", JSON.stringify(dataProduct));
+      showProducts()
+    }else{
+      alert('Quantity is equal 0 , you can press update and increase')
+    }
+   
+   }
+  }
+}
+
+// ALL IS DONE 
